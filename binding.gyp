@@ -60,7 +60,7 @@
             "sources": [
                 "src/cpp/wrapper.cpp",
                 "src/cpp/convert.cpp",
-                "src/cpp/cpp_wrappers.cpp",
+                "src/cpp/module.cpp",
             ],
             "include_dirs": [
                 "<!@(node -e \"require('nan')\")",

@@ -17,7 +17,7 @@
 
 #include <ass_parser_lib.h>
 
-#include "./cpp_wrappers.h"
+#include "./wrapper.h"
 
 [[nodiscard]] std::expected<AssSourceCpp, v8::Local<v8::Value>>
 get_ass_source_from_info(v8::Local<v8::Value> value);

@@ -74,7 +74,10 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] std::expected<ParseSettings, v8::Local<v8::Value>>
-get_parse_settings_from_info(v8::Local<v8::Value> value) {}
+get_parse_settings_from_info(v8::Local<v8::Value> value) {
+
+	return std::unexpected{ Nan::TypeError("TODO") };
+}
 
 v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, const AssParseResult* result) {
 
