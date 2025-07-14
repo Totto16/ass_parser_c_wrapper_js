@@ -28,5 +28,5 @@ get_ass_source_from_info(v8::Local<v8::Value> value);
 [[nodiscard]] std::expected<ParseSettings, v8::Local<v8::Value>>
 get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value);
 
-[[nodiscard]] v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate,
-                                                          AssParseResultCpp result);
+[[nodiscard]] v8::Local<v8::Value>
+ass_parse_result_to_js(v8::Isolate* isolate, std::unique_ptr<AssParseResultCpp> result);

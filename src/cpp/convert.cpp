@@ -807,9 +807,10 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 	return make_js_object(isolate, properties);
 }
 
-v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResultCpp result) {
+v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate,
+                                            std::unique_ptr<AssParseResultCpp> result) {
 
-	auto js_warnings = warnings_to_js(isolate, result.warnings());
+	auto js_warnings = warnings_to_js(isolate, result->warnings());
 
 	ObjectProperties properties{ { "warnings", js_warnings } };
 
@@ -829,7 +830,7 @@ v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResult
 		               properties.emplace_back("result", ass_result_js);
 	               },
 	           },
-	           result.result());
+	           result->result());
 
 	return make_js_object(isolate, properties);
 }

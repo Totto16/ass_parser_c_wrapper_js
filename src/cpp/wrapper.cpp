@@ -27,7 +27,8 @@ AssParseResultCpp::result() {
 	return AssParseResultOkCpp{ .result = parse_result_get_value(m_c_value) };
 }
 
-[[nodiscard]] AssParseResultCpp parse_ass_cpp(AssSourceCpp source, ParseSettings settings) {
+[[nodiscard]] std::unique_ptr<AssParseResultCpp> parse_ass_cpp(AssSourceCpp source,
+                                                               ParseSettings settings) {
 
 	AssSourceCpp copy = source;
 
@@ -46,7 +47,7 @@ AssParseResultCpp::result() {
 
 	auto* result = parse_ass(c_source, settings);
 
-	auto final_result = AssParseResultCpp{ result };
+	auto final_result = std::make_unique<AssParseResultCpp>(result);
 
 	return final_result;
 }

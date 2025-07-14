@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <variant>
 
@@ -41,10 +42,14 @@ struct AssParseResultCpp {
   public:
 	explicit AssParseResultCpp(AssParseResult* c_pointer);
 
+	AssParseResultCpp operator=(const AssParseResultCpp& c_pointerresult) = delete;
+	AssParseResultCpp(const AssParseResultCpp& c_pointerresult) = delete;
+
 	~AssParseResultCpp();
 
 	[[nodiscard]] Warnings warnings();
 	[[nodiscard]] std::variant<AssParseResultErrorCpp, AssParseResultOkCpp> result();
 };
 
-[[nodiscard]] AssParseResultCpp parse_ass_cpp(AssSourceCpp source, ParseSettings settings);
+[[nodiscard]] std::unique_ptr<AssParseResultCpp> parse_ass_cpp(AssSourceCpp source,
+                                                               ParseSettings settings);
