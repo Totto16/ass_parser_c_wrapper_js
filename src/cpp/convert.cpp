@@ -296,7 +296,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	UNUSED(isolate);
 
-	if(str.length == 0) {
+	if(str.length == 0 || str.start == nullptr) {
 		return Nan::EmptyString();
 	}
 
