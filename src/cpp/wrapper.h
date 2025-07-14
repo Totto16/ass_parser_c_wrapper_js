@@ -24,9 +24,25 @@ struct AssParseResultOkCpp {
 	AssResult result;
 };
 
+namespace helper {
+
+template <class... Ts> struct Overloaded : Ts... {
+	using Ts::operator()...;
+};
+template <class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
+} // namespace helper
+
 struct AssParseResultCpp {
-	Warnings warnings;
-	std::variant<AssParseResultErrorCpp, AssParseResultOkCpp> result;
+  private:
+	AssParseResult* m_c_value;
+
+  public:
+	explicit AssParseResultCpp(AssParseResult* c_pointer);
+
+	~AssParseResultCpp();
+
+	[[nodiscard]] Warnings warnings();
+	[[nodiscard]] std::variant<AssParseResultErrorCpp, AssParseResultOkCpp> result();
 };
 
 [[nodiscard]] AssParseResultCpp parse_ass_cpp(AssSourceCpp source, ParseSettings settings);
