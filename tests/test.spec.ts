@@ -23,16 +23,24 @@ describe("parse_ass: works as expected", () => {
 		expect(fs.existsSync(file)).toBe(false)
 
 		const result = AssParser.parse_ass_file(file, DEFAULT_SETTINGS)
-		expect(result).toBe(null)
+		expect(result).toMatchObject({
+			error: true,
+			message: "no such file",
+			warnings: [],
+		})
 	})
 
 	it("should return error for incorrect file", async () => {
-		const file = getFilePath("incorrect.rec")
+		const file = getFilePath("incorrect.ass")
 
 		expect(fs.existsSync(file)).toBe(true)
 
 		const result = AssParser.parse_ass_file(file, DEFAULT_SETTINGS)
-		expect(result).toBe(null)
+		expect(result).toMatchObject({
+			error: true,
+			message: "first line must be the script info section",
+			warnings: [],
+		})
 	})
 
 	it("should return an object for correct file", async () => {

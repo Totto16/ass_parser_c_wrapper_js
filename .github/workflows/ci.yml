@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  main_repo_ref: e0932d655e9dbffe9ef1c7ae02a53d69ce0f97a3
+  main_repo_ref: e2f7a6559e3f3b23fde99dc5a836c8523372744b
 
 jobs:
   build:
