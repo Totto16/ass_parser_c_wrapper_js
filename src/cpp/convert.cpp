@@ -5,6 +5,18 @@
 #include <limits>
 #include <stb/ds.h>
 
+// generic helper functions
+
+[[nodiscard]] static v8::Local<v8::Value> c_str_to_js(const char* str) {
+
+	return Nan::New<v8::String>(str).ToLocalChecked();
+}
+
+[[nodiscard]] static v8::Local<v8::Value> str_to_js(const std::string& str) {
+
+	return Nan::New<v8::String>(str).ToLocalChecked();
+}
+
 // js to c
 
 [[nodiscard]] std::expected<AssSourceCpp, v8::Local<v8::Value>>
@@ -16,7 +28,7 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 
 	auto object = value->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-	auto type_key = Nan::New<v8::String>("type").ToLocalChecked();
+	auto type_key = c_str_to_js("type");
 
 	if(!object->Has(Nan::GetCurrentContext(), type_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -33,7 +45,7 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 
 	if(type_value == "file") {
 
-		auto name_key = Nan::New<v8::String>("name").ToLocalChecked();
+		auto name_key = c_str_to_js("name");
 
 		if(!object->Has(Nan::GetCurrentContext(), name_key).ToChecked()) {
 			return std::unexpected{ Nan::TypeError(
@@ -53,7 +65,7 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 		return { result };
 	} else if(type_value == "string") {
 
-		auto content_key = Nan::New<v8::String>("content").ToLocalChecked();
+		auto content_key = c_str_to_js("content");
 
 		if(!object->Has(Nan::GetCurrentContext(), content_key).ToChecked()) {
 			return std::unexpected{ Nan::TypeError(
@@ -81,8 +93,7 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 [[nodiscard]] static std::expected<ScriptInfoStrictSettings, v8::Local<v8::Value>>
 get_sscript_info_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
 
-	auto allow_duplicate_fields_key =
-	    Nan::New<v8::String>("allow_duplicate_fields").ToLocalChecked();
+	auto allow_duplicate_fields_key = c_str_to_js("allow_duplicate_fields");
 
 	if(!object->Has(Nan::GetCurrentContext(), allow_duplicate_fields_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -99,8 +110,7 @@ get_sscript_info_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Obj
 
 	auto allow_duplicate_fields = allow_duplicate_fields_value_raw->ToBoolean(isolate)->Value();
 
-	auto allow_missing_script_type_key =
-	    Nan::New<v8::String>("allow_missing_script_type").ToLocalChecked();
+	auto allow_missing_script_type_key = c_str_to_js("allow_missing_script_type");
 
 	if(!object->Has(Nan::GetCurrentContext(), allow_missing_script_type_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -129,7 +139,7 @@ get_sscript_info_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Obj
 [[nodiscard]] static std::expected<StrictSettings, v8::Local<v8::Value>>
 get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
 
-	auto script_info_key = Nan::New<v8::String>("script_info").ToLocalChecked();
+	auto script_info_key = c_str_to_js("script_info");
 
 	if(!object->Has(Nan::GetCurrentContext(), script_info_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -153,8 +163,7 @@ get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) 
 		return std::unexpected{ script_info.error() };
 	}
 
-	auto allow_additional_fields_key =
-	    Nan::New<v8::String>("allow_additional_fields").ToLocalChecked();
+	auto allow_additional_fields_key = c_str_to_js("allow_additional_fields");
 
 	if(!object->Has(Nan::GetCurrentContext(), allow_additional_fields_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -171,8 +180,7 @@ get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) 
 
 	auto allow_additional_fields = allow_additional_fields_value_raw->ToBoolean(isolate)->Value();
 
-	auto allow_number_truncating_key =
-	    Nan::New<v8::String>("allow_number_truncating").ToLocalChecked();
+	auto allow_number_truncating_key = c_str_to_js("allow_number_truncating");
 
 	if(!object->Has(Nan::GetCurrentContext(), allow_number_truncating_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -189,8 +197,7 @@ get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) 
 
 	auto allow_number_truncating = allow_number_truncating_value_raw->ToBoolean(isolate)->Value();
 
-	auto allow_unrecognized_file_encoding_key =
-	    Nan::New<v8::String>("allow_unrecognized_file_encoding").ToLocalChecked();
+	auto allow_unrecognized_file_encoding_key = c_str_to_js("allow_unrecognized_file_encoding");
 
 	if(!object->Has(Nan::GetCurrentContext(), allow_unrecognized_file_encoding_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError("the 'strict_settings' argument needs to have a "
@@ -227,7 +234,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto object = value->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-	auto strict_settings_key = Nan::New<v8::String>("strict_settings").ToLocalChecked();
+	auto strict_settings_key = c_str_to_js("strict_settings");
 
 	if(!object->Has(Nan::GetCurrentContext(), strict_settings_key).ToChecked()) {
 		return std::unexpected{ Nan::TypeError(
@@ -265,18 +272,18 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 	return v8::BigInt::NewFromUnsigned(isolate, value);
 }
 
+[[nodiscard]] static v8::Local<v8::Value> u32_to_js(v8::Isolate* isolate, uint32_t value) {
+
+	return Nan::New<v8::Uint32>(value);
+}
+
 [[nodiscard]] static v8::Local<v8::Value> u64_to_appropiate_number(v8::Isolate* isolate,
                                                                    uint64_t value) {
 
 	if(value > std::numeric_limits<uint32_t>::max()) {
 		return new_bigint_from_uint64(isolate, value);
 	}
-	return Nan::New<v8::Uint32>(static_cast<uint32_t>(value));
-}
-
-[[nodiscard]] static v8::Local<v8::Value> u32_to_js(v8::Isolate* isolate, uint32_t value) {
-
-	return Nan::New<v8::Uint32>(static_cast<uint32_t>(value));
+	return u32_to_js(isolate, value);
 }
 
 [[nodiscard]] static v8::Local<v8::Value> size_t_to_js(v8::Isolate* isolate, size_t value) {
@@ -293,7 +300,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	char* value = get_normalized_string(str);
 
-	auto result = Nan::New<v8::String>(value).ToLocalChecked();
+	auto result = c_str_to_js(value);
 
 	free(value);
 
@@ -310,7 +317,22 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] static v8::Local<v8::Value> double_to_js(v8::Isolate* isolate, double value) {
-	return Nan::New<v8::Boolean>(value);
+	return Nan::New<v8::Number>(value);
+}
+
+using ObjectProperties = std::vector<std::pair<std::string, v8::Local<v8::Value>>>;
+
+[[nodiscard]] static v8::Local<v8::Value> make_js_object(v8::Isolate* isolate,
+                                                         const ObjectProperties& properties) {
+
+	v8::Local<v8::Object> object = Nan::New<v8::Object>();
+
+	for(const auto& [key, value] : properties) {
+		v8::Local<v8::String> key_value = str_to_js(key);
+		Nan::Set(object, key_value, value).Check();
+	}
+
+	return object;
 }
 
 // complex structs / objects to js
@@ -322,11 +344,11 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	ErrorStruct message = get_warnings_message_from_entry(warning);
 
-	auto js_message = Nan::New<v8::String>(message.message).ToLocalChecked();
+	auto js_message = c_str_to_js(message.message);
 
 	free_error_struct(message);
 
-	v8::Local<v8::String> message_key = Nan::New<v8::String>("message").ToLocalChecked();
+	v8::Local<v8::String> message_key = c_str_to_js("message");
 	Nan::Set(result, message_key, js_message).Check();
 
 	return result;
@@ -346,11 +368,51 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 	return array;
 }
 
+[[nodiscard]] static v8::Local<v8::Value>
+extra_section_entry_to_js(v8::Isolate* isolate, const ExtraSectionEntry& entry) {
+
+	v8::Local<v8::Object> result = Nan::New<v8::Object>();
+
+	size_t hm_length = stbds_shlenu(entry.fields);
+
+	for(size_t i = 0; i < hm_length; ++i) {
+		SectionFieldEntry hm_entry = entry.fields[i];
+
+		v8::Local<v8::String> key_value = c_str_to_js(hm_entry.key);
+
+		auto js_value = final_str_to_js(isolate, hm_entry.value);
+
+		Nan::Set(result, key_value, js_value).Check();
+	}
+
+	return result;
+}
+
+[[nodiscard]] static v8::Local<v8::Value>
+extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) {
+
+	v8::Local<v8::Object> result = Nan::New<v8::Object>();
+
+	size_t hm_length = stbds_shlenu(extra_sections.entries);
+
+	for(size_t i = 0; i < hm_length; ++i) {
+		ExtraSectionHashMapEntry entry = extra_sections.entries[i];
+
+		v8::Local<v8::String> key_value = c_str_to_js(entry.key);
+
+		auto js_value = extra_section_entry_to_js(isolate, entry.value);
+
+		Nan::Set(result, key_value, js_value).Check();
+	}
+
+	return result;
+}
+
 [[nodiscard]] static v8::Local<v8::Value> margin_to_js(v8::Isolate* isolate,
                                                        const MarginValue& value) {
 
 	if(value.is_default) {
-		return Nan::New<v8::String>("default").ToLocalChecked();
+		return c_str_to_js("default");
 	}
 
 	return size_t_to_js(isolate, value.data.value);
@@ -358,8 +420,6 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 [[nodiscard]] static v8::Local<v8::Value> ass_time_to_js(v8::Isolate* isolate,
                                                          const AssTime& time) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_hour = u32_to_js(isolate, time.hour);
 
@@ -369,19 +429,14 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_hundred = u32_to_js(isolate, time.hundred);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+	ObjectProperties properties{
 		{ "hour", js_hour },
 		{ "min", js_min },
 		{ "sec", js_sec },
 		{ "hundred", js_hundred },
 	};
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 [[nodiscard]] static const char* event_type_to_string(EventType event_type) {
@@ -401,13 +456,11 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 [[nodiscard]] static v8::Local<v8::Value> event_type_to_js(v8::Isolate* isolate,
                                                            const EventType& event_type) {
-	return Nan::New<v8::String>(event_type_to_string(event_type)).ToLocalChecked();
+	return c_str_to_js(event_type_to_string(event_type));
 }
 
 [[nodiscard]] static v8::Local<v8::Value> event_to_js(v8::Isolate* isolate,
                                                       const AssEventEntry& event) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_type = event_type_to_js(isolate, event.type);
 
@@ -431,7 +484,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_text = final_str_to_js(isolate, event.text);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+	ObjectProperties properties{
 		{ "type", js_type },         { "layer", js_layer },       { "start", js_start },
 		{ "end", js_end },           { "style", js_style },       { "name", js_name },
 		{ "margin_l", js_margin_l }, { "margin_r", js_margin_r }, { "margin_v", js_margin_v },
@@ -439,12 +492,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	};
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 [[nodiscard]] static v8::Local<v8::Value> events_to_js(v8::Isolate* isolate,
@@ -463,18 +511,16 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 [[nodiscard]] static v8::Local<v8::Value> border_style_to_js(v8::Isolate* isolate,
                                                              const BorderStyle& style) {
-	return Nan::New<v8::Uint32>(static_cast<uint32_t>(style));
+	return u32_to_js(isolate, static_cast<uint32_t>(style));
 }
 
 [[nodiscard]] static v8::Local<v8::Value> alignment_to_js(v8::Isolate* isolate,
                                                           const AssAlignment& alignment) {
-	return Nan::New<v8::Uint32>(static_cast<uint32_t>(alignment));
+	return u32_to_js(isolate, static_cast<uint32_t>(alignment));
 }
 
 [[nodiscard]] static v8::Local<v8::Value> ass_color_to_js(v8::Isolate* isolate,
                                                           const AssColor& color) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_r = u32_to_js(isolate, color.r);
 
@@ -484,25 +530,18 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_a = u32_to_js(isolate, color.a);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+	ObjectProperties properties{
 		{ "r", js_r },
 		{ "g", js_g },
 		{ "b", js_b },
 		{ "a", js_a },
 	};
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 [[nodiscard]] static v8::Local<v8::Value> style_to_js(v8::Isolate* isolate,
                                                       const AssStyleEntry& style) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_name = final_str_to_js(isolate, style.name);
 
@@ -550,7 +589,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_encoding = size_t_to_js(isolate, style.encoding);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+	ObjectProperties properties{
 		{ "name", js_name },
 		{ "fontname", js_fontname },
 		{ "fontsize", js_fontsize },
@@ -577,12 +616,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	};
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 [[nodiscard]] static v8::Local<v8::Value> styles_to_js(v8::Isolate* isolate,
@@ -613,18 +647,16 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 [[nodiscard]] static v8::Local<v8::Value> script_type_to_js(v8::Isolate* isolate,
                                                             const ScriptType& script_type) {
-	return Nan::New<v8::String>(script_type_to_string(script_type)).ToLocalChecked();
+	return c_str_to_js(script_type_to_string(script_type));
 }
 
 [[nodiscard]] static v8::Local<v8::Value> wrap_style_to_js(v8::Isolate* isolate,
                                                            const WrapStyle& style) {
-	return Nan::New<v8::Uint32>(static_cast<uint32_t>(style));
+	return u32_to_js(isolate, static_cast<uint32_t>(style));
 }
 
 [[nodiscard]] static v8::Local<v8::Value> script_info_to_js(v8::Isolate* isolate,
                                                             const AssScriptInfo& script_info) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_title = final_str_to_js(isolate, script_info.title);
 
@@ -664,7 +696,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_ycbcr_matrix = final_str_to_js(isolate, script_info.ycbcr_matrix);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+	ObjectProperties properties{
 		{ "title", js_title },
 		{ "original_script", js_original_script },
 		{ "original_translation", js_original_translation },
@@ -686,18 +718,11 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 		{ "ycbcr_matrix", js_ycbcr_matrix },
 	};
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 [[nodiscard]] static v8::Local<v8::Value> ass_result_to_js(v8::Isolate* isolate,
                                                            const AssResult& ass_result) {
-
-	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
 	auto js_script_info = script_info_to_js(isolate, ass_result.script_info);
 
@@ -709,36 +734,26 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 
 	auto js_file_props = file_props_to_js(isolate, ass_result.file_props);
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
-		{ "script_info", js_script_info },
-		{ "styles", js_styles },
-		{ "events", js_events },
-		{ "extra_sections", js_extra_sections },
-		{ "file_props", js_file_props }
-	};
+	ObjectProperties properties{ { "script_info", js_script_info },
+		                         { "styles", js_styles },
+		                         { "events", js_events },
+		                         { "extra_sections", js_extra_sections },
+		                         { "file_props", js_file_props } };
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(result, keyValue, value).Check();
-	}
-
-	return result;
+	return make_js_object(isolate, properties);
 }
 
 v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResultCpp result) {
 
-	v8::Local<v8::Object> object = Nan::New<v8::Object>();
-
 	auto js_warnings = warnings_to_js(isolate, result.warnings());
 
-	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{ { "warnings",
-		                                                                           js_warnings } };
+	ObjectProperties properties_vector{ { "warnings", js_warnings } };
 
 	std::visit(helper::Overloaded{
 	               [&properties_vector](const AssParseResultErrorCpp& result_err) -> void {
 		               properties_vector.emplace_back("error", Nan::True());
 
-		               auto message_js = Nan::New<v8::String>(result_err.message).ToLocalChecked();
+		               auto message_js = str_to_js(result_err.message);
 
 		               properties_vector.emplace_back("message", message_js);
 	               },
@@ -752,10 +767,5 @@ v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResult
 	           },
 	           result.result());
 
-	for(const auto& [key, value] : properties_vector) {
-		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
-		Nan::Set(object, keyValue, value).Check();
-	}
-
-	return object;
+	return make_js_object(properties_vector);
 }
