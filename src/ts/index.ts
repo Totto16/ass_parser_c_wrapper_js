@@ -28,11 +28,6 @@ export interface ParseSettings {
 
 export type ParseSettingsTS = "strict" | "non-strict" | ParseSettings
 
-export interface AssParseResultError {
-	error: true
-	message: string
-}
-
 export enum LineType {
 	"CrLf",
 	"Lf",
@@ -191,17 +186,22 @@ export interface AssResult {
 	file_props: FileProps
 }
 
-export interface AssParseResultSuccess {
-	error: false
-	result: AssResult
-}
-
 export interface Warning {
 	message: string
 }
 
 export interface AssParseResultBase {
 	warnings: Warning[]
+}
+
+export interface AssParseResultError {
+	error: true
+	message: string
+}
+
+export interface AssParseResultSuccess {
+	error: false
+	result: AssResult
 }
 
 export type AssParseResult = AssParseResultBase &

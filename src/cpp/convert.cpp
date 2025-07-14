@@ -250,7 +250,51 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 	return { settings };
 }
 
-v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, const AssParseResult* result) {
+[[nodiscard]] static v8::Local<v8::Value> warnings_to_js(v8::Isolate* isolate,
+                                                         const Warnings& warnings) {
 
+	// TODO
 	return Nan::Null();
+}
+
+[[nodiscard]] static v8::Local<v8::Value> ass_result_to_js(v8::Isolate* isolate,
+                                                           const AssResult& ass_Result) {
+
+	// TODO
+	return Nan::Null();
+}
+
+v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResultCpp result) {
+
+	v8::Local<v8::Object> object = Nan::New<v8::Object>();
+
+	auto js_warnings = warnings_to_js(isolate, result.warnings());
+
+	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{ { "warnings",
+		                                                                           js_warnings } };
+
+	std::visit(helper::Overloaded{
+	               [&properties_vector](const AssParseResultErrorCpp& result_err) -> void {
+		               properties_vector.emplace_back("error", Nan::True());
+
+		               auto message_js = Nan::New<v8::String>(result_err.message).ToLocalChecked();
+
+		               properties_vector.emplace_back("message", message_js);
+	               },
+	               [&properties_vector, isolate](const AssParseResultOkCpp& result_ok) -> void {
+		               properties_vector.emplace_back("error", Nan::False());
+
+		               auto ass_result_js = ass_result_to_js(isolate, result_ok.result);
+
+		               properties_vector.emplace_back("result", ass_result_js);
+	               },
+	           },
+	           result.result());
+
+	for(const auto& [key, value] : properties_vector) {
+		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
+		Nan::Set(object, keyValue, value).Check();
+	}
+
+	return object;
 }

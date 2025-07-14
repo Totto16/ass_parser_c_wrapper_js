@@ -28,7 +28,7 @@ NAN_METHOD(parse_ass) {
 		return;
 	}
 
-	auto settings = get_parse_settings_from_info(info[1]);
+	auto settings = get_parse_settings_from_info(info.GetIsolate(), info[1]);
 
 	if(not settings.has_value()) {
 		info.GetIsolate()->ThrowException(settings.error());
