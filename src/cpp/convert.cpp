@@ -7,12 +7,12 @@
 
 // generic helper functions
 
-[[nodiscard]] static v8::Local<v8::Value> c_str_to_js(const char* str) {
+[[nodiscard]] static v8::Local<v8::String> c_str_to_js(const char* str) {
 
 	return Nan::New<v8::String>(str).ToLocalChecked();
 }
 
-[[nodiscard]] static v8::Local<v8::Value> str_to_js(const std::string& str) {
+[[nodiscard]] static v8::Local<v8::String> str_to_js(const std::string& str) {
 
 	return Nan::New<v8::String>(str).ToLocalChecked();
 }
@@ -291,8 +291,8 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 	return u64_to_appropiate_number(isolate, value);
 }
 
-[[nodiscard]] static v8::Local<v8::Value> final_str_to_js(v8::Isolate* isolate,
-                                                          const FinalStr& str) {
+[[nodiscard]] static v8::Local<v8::String> final_str_to_js(v8::Isolate* isolate,
+                                                           const FinalStr& str) {
 
 	UNUSED(isolate);
 
