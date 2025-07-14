@@ -1,6 +1,9 @@
 import path from "path"
 
-const rootDir = path.join(__dirname, "..")
+const rootDir = path.join(
+	__dirname,
+	...(__filename.endsWith(".ts") ? ["..", ".."] : [".."])
+)
 const ass_parser = require("node-gyp-build")(rootDir)
 
 export type U64 = number | BigInt
