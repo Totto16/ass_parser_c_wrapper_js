@@ -62,14 +62,13 @@ export interface AssTime {
 	hundred: U8
 }
 
-export enum EventType {
-	"Dialogue",
-	"Comment",
-	"Picture",
-	"Sound",
-	"Movie",
-	"Command",
-}
+export type EventType =
+	| "Dialogue"
+	| "Comment"
+	| "Picture"
+	| "Sound"
+	| "Movie"
+	| "Command"
 
 export interface AssEvent {
 	// marks different event_types

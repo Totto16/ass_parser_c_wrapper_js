@@ -346,6 +346,121 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 	return array;
 }
 
+[[nodiscard]] static v8::Local<v8::Value> margin_to_js(v8::Isolate* isolate,
+                                                       const MarginValue& value) {
+
+	if(value.is_default) {
+		return Nan::New<v8::String>("default").ToLocalChecked();
+	}
+
+	return size_t_to_js(isolate, value.data.value);
+}
+
+[[nodiscard]] static v8::Local<v8::Value> ass_time_to_js(v8::Isolate* isolate,
+                                                         const AssTime& time) {
+
+	v8::Local<v8::Object> result = Nan::New<v8::Object>();
+
+	auto js_hour = u32_to_js(isolate, time.hour);
+
+	auto js_min = u32_to_js(isolate, time.min);
+
+	auto js_sec = u32_to_js(isolate, time.sec);
+
+	auto js_hundred = u32_to_js(isolate, time.hundred);
+
+	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+		{ "hour", js_hour },
+		{ "min", js_min },
+		{ "sec", js_sec },
+		{ "hundred", js_hundred },
+	};
+
+	for(const auto& [key, value] : properties_vector) {
+		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
+		Nan::Set(result, keyValue, value).Check();
+	}
+
+	return result;
+}
+
+[[nodiscard]] static const char* event_type_to_string(EventType event_type) {
+	switch(event_type) {
+		case EventTypeDialogue: return "Dialogue";
+		case EventTypeComment: return "Comment";
+		case EventTypePicture: return "Picture";
+		case EventTypeSound: return "Sound";
+		case EventTypeMovie: return "Movie";
+		case EventTypeCommand: return "Command";
+		default: {
+			assert(false && "UNREACHABLE");
+			return "<ERROR>";
+		}
+	}
+}
+
+[[nodiscard]] static v8::Local<v8::Value> event_type_to_js(v8::Isolate* isolate,
+                                                           const EventType& event_type) {
+	return Nan::New<v8::String>(event_type_to_string(event_type)).ToLocalChecked();
+}
+
+[[nodiscard]] static v8::Local<v8::Value> event_to_js(v8::Isolate* isolate,
+                                                      const AssEventEntry& event) {
+
+	v8::Local<v8::Object> result = Nan::New<v8::Object>();
+
+	auto js_type = event_type_to_js(isolate, event.type);
+
+	auto js_layer = size_t_to_js(isolate, event.layer);
+
+	auto js_start = ass_time_to_js(isolate, event.start);
+
+	auto js_end = ass_time_to_js(isolate, event.end);
+
+	auto js_style = final_str_to_js(isolate, event.style);
+
+	auto js_name = final_str_to_js(isolate, event.name);
+
+	auto js_margin_l = margin_to_js(isolate, event.margin_l);
+
+	auto js_margin_r = margin_to_js(isolate, event.margin_r);
+
+	auto js_margin_v = margin_to_js(isolate, event.margin_v);
+
+	auto js_effect = final_str_to_js(isolate, event.effect);
+
+	auto js_text = final_str_to_js(isolate, event.text);
+
+	std::vector<std::pair<std::string, v8::Local<v8::Value>>> properties_vector{
+		{ "type", js_type },         { "layer", js_layer },       { "start", js_start },
+		{ "end", js_end },           { "style", js_style },       { "name", js_name },
+		{ "margin_l", js_margin_l }, { "margin_r", js_margin_r }, { "margin_v", js_margin_v },
+		{ "effect", js_effect },     { "text", js_text },
+
+	};
+
+	for(const auto& [key, value] : properties_vector) {
+		v8::Local<v8::String> keyValue = Nan::New<v8::String>(key).ToLocalChecked();
+		Nan::Set(result, keyValue, value).Check();
+	}
+
+	return result;
+}
+
+[[nodiscard]] static v8::Local<v8::Value> events_to_js(v8::Isolate* isolate,
+                                                       const AssEvents& events) {
+
+	v8::Local<v8::Array> array = v8::Array::New(isolate);
+
+	for(size_t i = 0; i < stbds_arrlenu(events.entries); ++i) {
+		AssEventEntry event = events.entries[i];
+
+		Nan::Set(array, i, event_to_js(isolate, event));
+	}
+
+	return array;
+}
+
 [[nodiscard]] static v8::Local<v8::Value> border_style_to_js(v8::Isolate* isolate,
                                                              const BorderStyle& style) {
 	return Nan::New<v8::Uint32>(static_cast<uint32_t>(style));
