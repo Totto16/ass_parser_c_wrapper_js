@@ -140,11 +140,7 @@ export interface AssStyle {
 	encoding: SizeT
 }
 
-export enum ScriptType {
-	"Unknown",
-	"V4",
-	"V4Plus",
-}
+export type ScriptType = "Unknown" | "V4" | "V4Plus"
 
 export enum WrapStyle {
 	"Smart" = 0,
