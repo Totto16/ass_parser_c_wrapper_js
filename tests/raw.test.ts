@@ -41,7 +41,7 @@ describe("exported properties", () => {
 		const expectedProperties: Record<string, any> = {
 			parse_ass: () => {},
 			version: "0.0.1",
-			commit_hash: "b88e536ba4b0",
+			commit_hash: "ffb19c13ca58",
 		}
 
 		for (const key in expectedProperties) {

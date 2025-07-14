@@ -1,0 +1,116 @@
+name: Build CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+  workflow_dispatch:
+
+env:
+  main_repo_ref: ffb19c13ca58fb00cb1ac9eec3ce65e9f797dcf0
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}-${{ matrix.config.os-version }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Linux (Arm64)
+            os: ubuntu
+            os-version: 24.04-arm
+
+          - name: Linux
+            os: ubuntu
+            os-version: 24.04
+
+          - name: MacOS
+            os: macos
+            os-version: 13
+
+          - name: MacOS (Arm64)
+            os: macos
+            os-version: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+
+      - uses: actions/checkout@v4
+        name: Checkout main repo
+        with:
+          fetch-depth: '0'
+          repository: Totto16/ass_parser_c
+          ref: ${{ env.main_repo_ref }}
+          path: ./ass_parser_c
+          submodules: false
+
+      - name: Setup Clang (Linux)
+        if: matrix.config.os == 'ubuntu'
+        run: |
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            sudo ./llvm.sh 20
+            echo "CC=clang-20" >> "$GITHUB_ENV"
+            echo "CXX=clang++-20" >> "$GITHUB_ENV"
+
+      - name: Setup Clang (MacOS)
+        if: matrix.config.os == 'macos'
+        run: |
+          brew update
+          brew install llvm@20 lld@20
+          echo "$(brew --prefix)/opt/llvm/bin" >> $GITHUB_PATH
+          echo "LDFLAGS=-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/llvm/lib/c++ -Wl,-rpath,$(brew --prefix)/opt/llvm/lib/c++" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I$(brew --prefix)/opt/llvm/include" >> "$GITHUB_ENV"
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+          echo "OBJC=clang" >> "$GITHUB_ENV"
+          echo "CC_LD=lld" >> "$GITHUB_ENV"
+          echo "CXX_LD=lld" >> "$GITHUB_ENV"
+          echo "OBJC_LD=lld" >> "$GITHUB_ENV"
+
+      - name: Setup meson (MacOS)
+        if: matrix.config.os == 'macos'
+        run: |
+          brew update
+          brew install meson
+
+      # NOTE: meson has no dependencies, so --break-system-packages doesn't really break anything!
+      - name: Setup meson
+        if: matrix.config.os != 'macos'
+        run: |
+          pip install meson --break-system-packages
+
+      - name: Install dependencies (Linux)
+        if: matrix.config.os == 'ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build -y --no-install-recommends
+
+      - name: Build and Install ass_parser_c
+        run: |
+          cd ass_parser_c
+          meson setup build -Dbuildtype=release -Ddefault_library=static --fatal-meson-warnings
+          ${{ matrix.config.os == 'ubuntu' && 'sudo' || '' }} meson install -C build
+          ${{ matrix.config.os == 'ubuntu' && 'sudo ldconfig' || '' }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build package
+        run: |
+          npm clean-install -D
+          npm run build --verbose
+          npm run test
+          npm pack
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.config.name }} Node.js Wrapper
+          path: ass_parser*.tgz
