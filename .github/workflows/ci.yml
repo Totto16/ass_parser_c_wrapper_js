@@ -89,6 +89,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build -y --no-install-recommends
+          sudo pip install meson --break-system-packages
 
       - name: Build and Install ass_parser_c
         run: |
