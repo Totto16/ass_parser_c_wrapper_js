@@ -375,6 +375,61 @@ using ObjectProperties = std::vector<std::pair<std::string, v8::Local<v8::Value>
 	return array;
 }
 
+[[nodiscard]] static const char* line_type_to_string(LineType line_type) {
+	switch(line_type) {
+		case LineTypeCrLf: return "CrLf";
+		case LineTypeLf: return "Lf";
+		case LineTypeCr: return "Cr";
+		default: {
+			assert(false && "UNREACHABLE");
+			return "<ERROR>";
+		}
+	}
+}
+
+[[nodiscard]] static v8::Local<v8::Value> line_type_to_js(v8::Isolate* isolate,
+                                                          const LineType& line_type) {
+	UNUSED(isolate);
+	return c_str_to_js(line_type_to_string(line_type));
+}
+
+[[nodiscard]] static const char* file_type_to_string(FileType file_type) {
+	switch(file_type) {
+		case FileTypeUnknown: return "Unknown";
+		case FileTypeUtf8: return "UTF-8";
+		case FileTypeUtf16BE: return "UTF-16BE";
+		case FileTypeUtf16LE: return "UTF-16LE";
+		case FileTypeUtf32BE: return "UTF-32BE";
+		case FileTypeUtf32LE: return "UTF-32LE";
+		default: {
+			assert(false && "UNREACHABLE");
+			return "<ERROR>";
+		}
+	}
+}
+
+[[nodiscard]] static v8::Local<v8::Value> file_type_to_js(v8::Isolate* isolate,
+                                                          const FileType& file_type) {
+	UNUSED(isolate);
+	return c_str_to_js(file_type_to_string(file_type));
+}
+
+[[nodiscard]] static v8::Local<v8::Value> file_props_to_js(v8::Isolate* isolate,
+                                                           const FileProps& file_props) {
+
+	auto js_line_type = line_type_to_js(isolate, file_props.line_type);
+
+	auto js_file_type = file_type_to_js(isolate, file_props.file_type);
+
+	ObjectProperties properties{
+		{ "line_type", js_line_type },
+		{ "file_type", js_file_type },
+
+	};
+
+	return make_js_object(isolate, properties);
+}
+
 [[nodiscard]] static v8::Local<v8::Value>
 extra_section_entry_to_js(v8::Isolate* isolate, const ExtraSectionEntry& entry) {
 
@@ -756,25 +811,25 @@ v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate, AssParseResult
 
 	auto js_warnings = warnings_to_js(isolate, result.warnings());
 
-	ObjectProperties properties_vector{ { "warnings", js_warnings } };
+	ObjectProperties properties{ { "warnings", js_warnings } };
 
 	std::visit(helper::Overloaded{
-	               [&properties_vector](const AssParseResultErrorCpp& result_err) -> void {
-		               properties_vector.emplace_back("error", Nan::True());
+	               [&properties](const AssParseResultErrorCpp& result_err) -> void {
+		               properties.emplace_back("error", Nan::True());
 
 		               auto message_js = str_to_js(result_err.message);
 
-		               properties_vector.emplace_back("message", message_js);
+		               properties.emplace_back("message", message_js);
 	               },
-	               [&properties_vector, isolate](const AssParseResultOkCpp& result_ok) -> void {
-		               properties_vector.emplace_back("error", Nan::False());
+	               [&properties, isolate](const AssParseResultOkCpp& result_ok) -> void {
+		               properties.emplace_back("error", Nan::False());
 
 		               auto ass_result_js = ass_result_to_js(isolate, result_ok.result);
 
-		               properties_vector.emplace_back("result", ass_result_js);
+		               properties.emplace_back("result", ass_result_js);
 	               },
 	           },
 	           result.result());
 
-	return make_js_object(properties_vector);
+	return make_js_object(isolate, properties);
 }

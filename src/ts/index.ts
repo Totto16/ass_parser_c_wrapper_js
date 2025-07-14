@@ -28,21 +28,15 @@ export interface ParseSettings {
 
 export type ParseSettingsTS = "strict" | "non-strict" | ParseSettings
 
-export enum LineType {
-	"CrLf",
-	"Lf",
-	"Cr",
-}
+export type LineType = "CrLf" | "Lf" | "Cr"
 
-export enum FileType {
-	"unknown",
-	"UTF-8",
-	"UTF-16BE",
-	"UTF-16LE",
-	"UTF-32BE",
-	"UTF-32LE",
-}
-FileType
+export type FileType =
+	| "Unknown"
+	| "UTF-8"
+	| "UTF-16BE"
+	| "UTF-16LE"
+	| "UTF-32BE"
+	| "UTF-32LE"
 
 export interface FileProps {
 	line_type: LineType
