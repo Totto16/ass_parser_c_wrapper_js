@@ -273,7 +273,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] static v8::Local<v8::Value> u32_to_js(v8::Isolate* isolate, uint32_t value) {
-
+	UNUSED(isolate);
 	return Nan::New<v8::Uint32>(value);
 }
 
@@ -294,6 +294,8 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 [[nodiscard]] static v8::Local<v8::Value> final_str_to_js(v8::Isolate* isolate,
                                                           const FinalStr& str) {
 
+	UNUSED(isolate);
+
 	if(str.length == 0) {
 		return Nan::EmptyString();
 	}
@@ -308,6 +310,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] static v8::Local<v8::Value> bool_to_js(v8::Isolate* isolate, bool value) {
+	UNUSED(isolate);
 
 	if(value) {
 		return Nan::True();
@@ -317,6 +320,7 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] static v8::Local<v8::Value> double_to_js(v8::Isolate* isolate, double value) {
+	UNUSED(isolate);
 	return Nan::New<v8::Number>(value);
 }
 
@@ -324,6 +328,7 @@ using ObjectProperties = std::vector<std::pair<std::string, v8::Local<v8::Value>
 
 [[nodiscard]] static v8::Local<v8::Value> make_js_object(v8::Isolate* isolate,
                                                          const ObjectProperties& properties) {
+	UNUSED(isolate);
 
 	v8::Local<v8::Object> object = Nan::New<v8::Object>();
 
@@ -339,6 +344,8 @@ using ObjectProperties = std::vector<std::pair<std::string, v8::Local<v8::Value>
 
 [[nodiscard]] static v8::Local<v8::Value> warning_to_js(v8::Isolate* isolate,
                                                         const WarningEntry& warning) {
+
+	UNUSED(isolate);
 
 	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
@@ -456,6 +463,7 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 
 [[nodiscard]] static v8::Local<v8::Value> event_type_to_js(v8::Isolate* isolate,
                                                            const EventType& event_type) {
+	UNUSED(isolate);
 	return c_str_to_js(event_type_to_string(event_type));
 }
 
@@ -647,6 +655,7 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 
 [[nodiscard]] static v8::Local<v8::Value> script_type_to_js(v8::Isolate* isolate,
                                                             const ScriptType& script_type) {
+	UNUSED(isolate);
 	return c_str_to_js(script_type_to_string(script_type));
 }
 

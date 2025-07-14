@@ -2,14 +2,17 @@
 
 #pragma once
 
-#if defined(__GNUC__) & !defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
+#if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
+#endif
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
 #include <nan.h>
 
-#if defined(__GNUC__) & !defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

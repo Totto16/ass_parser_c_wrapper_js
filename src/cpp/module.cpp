@@ -1,15 +1,4 @@
 
-#if defined(__GNUC__) & !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
-#endif
-
-#include <nan.h>
-
-#if defined(__GNUC__) & !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-
 #include "./convert.hpp"
 
 #include <ass_parser_lib.h>

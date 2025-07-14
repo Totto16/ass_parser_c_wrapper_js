@@ -32,6 +32,8 @@ template <class... Ts> struct Overloaded : Ts... {
 template <class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
 } // namespace helper
 
+#define UNUSED(v) ((void)(v))
+
 struct AssParseResultCpp {
   private:
 	AssParseResult* m_c_value;
