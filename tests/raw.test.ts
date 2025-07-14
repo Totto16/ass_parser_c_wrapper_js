@@ -1,16 +1,11 @@
 import { expect } from "@jest/globals"
 import path from "path"
-import fs from "fs"
 
 function fail(reason = "fail was called in a test."): never {
 	throw new Error(reason)
 }
 
 global.fail = fail
-
-function getFilePath(name: string): string {
-	return path.join(__dirname, `files`, name)
-}
 
 const rootDir = path.join(__dirname, "..")
 const ass_parser = require("node-gyp-build")(rootDir)
