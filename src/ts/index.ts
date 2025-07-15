@@ -204,9 +204,7 @@ type AssSource =
 	| { type: "string"; content: string }
 
 export class AssParser {
-	private static resolve_parse_settings(
-		settings_ts: ParseSettingsTS
-	): ParseSettings {
+	static resolve_parse_settings(settings_ts: ParseSettingsTS): ParseSettings {
 		if (settings_ts === "strict") {
 			return {
 				strict_settings: {
