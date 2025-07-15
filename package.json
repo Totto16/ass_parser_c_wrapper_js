@@ -46,7 +46,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Totto16/ass_parser_c.git"
+		"url": "git+https://github.com/Totto16/ass_parser_c_wrapper_js.git"
 	},
 	"dependencies": {
 		"node-gyp-build": "^4.8.4",
