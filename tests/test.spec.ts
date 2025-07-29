@@ -14,7 +14,10 @@ function getFilePath(name: string): string {
 	return path.join(__dirname, `files`, name)
 }
 
-const DEFAULT_SETTINGS: ParseSettingsTS = "non-strict"
+const DEFAULT_SETTINGS: ParseSettingsTS = {
+	strict_settings: "non-strict",
+	validate_settings: "everything",
+}
 
 describe("parse_ass: works as expected", () => {
 	it("should return an error for non existent file", async () => {
