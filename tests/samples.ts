@@ -8,7 +8,26 @@ export interface TestFile {
 export const sampleFiles: TestFile[] = [
 	{
 		result: {
-			warnings: [],
+			diagnostics: [
+				{
+					message:
+						"style 'Default': no font for 'Disney Simple' found",
+					severity: "warning",
+					position: { line: 14, column: 15 },
+				},
+				{
+					message:
+						"style 'Style 2': no font for 'Disney Simple' found",
+					severity: "warning",
+					position: { line: 15, column: 15 },
+				},
+				{
+					message:
+						"style 'Style with ; xD': no font for 'Disney Simple' found",
+					severity: "warning",
+					position: { line: 16, column: 23 },
+				},
+			],
 			error: false,
 			result: {
 				script_info: {
@@ -162,22 +181,29 @@ export const sampleFiles: TestFile[] = [
 	},
 	{
 		result: {
-			warnings: [
+			diagnostics: [
 				{
 					message:
 						"unrecognized file type, no BOM present, assuming UTF-8 (ascii also works with that)",
+					severity: "warning",
 				},
 				{
 					message:
 						"unexpected field 'Last Style Storage' in 'script info' section",
+					severity: "warning",
+					position: { line: 9, column: 0 },
 				},
 				{
 					message:
 						"unexpected field 'Video File' in 'script info' section",
+					severity: "warning",
+					position: { line: 10, column: 0 },
 				},
 				{
 					message:
 						"unexpected field 'Video Position' in 'script info' section",
+					severity: "warning",
+					position: { line: 13, column: 0 },
 				},
 			],
 			error: false,
@@ -798,7 +824,7 @@ export const sampleFiles: TestFile[] = [
 	},
 	{
 		result: {
-			warnings: [],
+			diagnostics: [],
 			error: false,
 			result: {
 				script_info: {

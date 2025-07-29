@@ -520,14 +520,14 @@ diagnostic_severity_to_js(v8::Isolate* isolate, const DiagnosticSeverity& severi
 	return c_str_to_js(diagnostic_severity_string(severity));
 }
 
-[[nodiscard]] static v8::Local<v8::Value>
-diagnostic_to_js(v8::Isolate* isolate, const DiagnosticEntry& diagnostic, const char* source_file) {
+[[nodiscard]] static v8::Local<v8::Value> diagnostic_to_js(v8::Isolate* isolate,
+                                                           const DiagnosticEntry& diagnostic) {
 
 	UNUSED(isolate);
 
 	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
-	MessageStruct message = get_message_from_entry(diagnostic, source_file);
+	MessageStruct message = get_message_from_entry(diagnostic);
 
 	auto js_message = c_str_to_js(message.message);
 
@@ -552,25 +552,15 @@ diagnostic_to_js(v8::Isolate* isolate, const DiagnosticEntry& diagnostic, const 
 	return result;
 }
 
-[[nodiscard]] static v8::Local<v8::Value>
-diagnostics_to_js(v8::Isolate* isolate, const Diagnostics& diagnostics, AssSourceCpp ass_source) {
-
-	const char* source_file = NULL;
-
-	std::visit(helper::Overloaded{
-	               [&source_file](const FileSourceCpp& file_source) -> void {
-		               source_file = file_source.file.c_str();
-	               },
-	               [&source_file](const StringSourceCpp&) -> void { source_file = NULL; },
-	           },
-	           ass_source);
+[[nodiscard]] static v8::Local<v8::Value> diagnostics_to_js(v8::Isolate* isolate,
+                                                            const Diagnostics& diagnostics) {
 
 	v8::Local<v8::Array> array = v8::Array::New(isolate);
 
 	for(size_t i = 0; i < stbds_arrlenu(diagnostics.entries); ++i) {
 		DiagnosticEntry diagnostic = diagnostics.entries[i];
 
-		Nan::Set(array, i, diagnostic_to_js(isolate, diagnostic, source_file));
+		Nan::Set(array, i, diagnostic_to_js(isolate, diagnostic));
 	}
 
 	return array;
@@ -1009,10 +999,9 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 }
 
 v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate,
-                                            std::unique_ptr<AssParseResultCpp> result,
-                                            AssSourceCpp ass_source) {
+                                            std::unique_ptr<AssParseResultCpp> result) {
 
-	auto js_diagnostics = diagnostics_to_js(isolate, result->diagnostics(), ass_source);
+	auto js_diagnostics = diagnostics_to_js(isolate, result->diagnostics());
 
 	ObjectProperties properties{ { "diagnostics", js_diagnostics } };
 

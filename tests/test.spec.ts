@@ -28,8 +28,7 @@ describe("parse_ass: works as expected", () => {
 		const result = AssParser.parse_ass_file(file, DEFAULT_SETTINGS)
 		expect(result).toMatchObject({
 			error: true,
-			message: "no such file",
-			warnings: [],
+			diagnostics: [{ message: "no such file", severity: "error" }],
 		})
 	})
 
@@ -41,8 +40,16 @@ describe("parse_ass: works as expected", () => {
 		const result = AssParser.parse_ass_file(file, DEFAULT_SETTINGS)
 		expect(result).toMatchObject({
 			error: true,
-			message: "first line must be the script info section",
-			warnings: [],
+			diagnostics: [
+				{
+					message: "first line must be the script info section",
+					position: {
+						column: 1,
+						line: 0,
+					},
+					severity: "error",
+				},
+			],
 		})
 	})
 

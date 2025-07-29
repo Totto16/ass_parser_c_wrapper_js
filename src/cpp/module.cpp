@@ -26,7 +26,7 @@ NAN_METHOD(parse_ass) {
 
 	auto parsed = parse_ass_cpp(source.value(), settings.value());
 
-	auto result = ass_parse_result_to_js(info.GetIsolate(), std::move(parsed), source.value());
+	auto result = ass_parse_result_to_js(info.GetIsolate(), std::move(parsed));
 
 	info.GetReturnValue().Set(result);
 }
