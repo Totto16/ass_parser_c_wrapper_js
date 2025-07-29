@@ -23,13 +23,39 @@ export interface StrictSettings {
 	allow_additional_fields: boolean
 	allow_number_truncating: boolean
 	allow_unrecognized_file_encoding: boolean
+	allow_validation_errors: boolean
+}
+
+export type FontPreset =
+	| "disabled"
+	| "strict-all"
+	| "strict"
+	| "moderate"
+	| "lenient"
+
+export interface FontSettings {
+	preset: FontPreset
+}
+
+export interface ValidateSettings {
+	font_settings: FontSettings
+	validate_styles: boolean
+	validate_text: boolean
 }
 
 export interface ParseSettings {
 	strict_settings: StrictSettings
+	validate_settings: ValidateSettings
 }
 
-export type ParseSettingsTS = "strict" | "non-strict" | ParseSettings
+export type StrictSettingsTS = "strict" | "non-strict" | StrictSettings
+
+export type ValidateSettingsTS = "everything" | "nothing" | ValidateSettings
+
+export interface ParseSettingsTS {
+	strict_settings: StrictSettingsTS
+	validate_settings: ValidateSettingsTS
+}
 
 export type LineType = "CrLf" | "Lf" | "Cr"
 
@@ -178,17 +204,24 @@ export interface AssResult {
 	file_props: FileProps
 }
 
-export interface Warning {
+export type DiagnosticSeverity = "warning" | "error"
+
+export interface FilePos {
+	line: SizeT
+	column: SizeT
+}
+export interface Diagnostic {
 	message: string
+	severity: DiagnosticSeverity
+	position?: FilePos
 }
 
 export interface AssParseResultBase {
-	warnings: Warning[]
+	diagnostics: Diagnostic[]
 }
 
 export interface AssParseResultError {
 	error: true
-	message: string
 }
 
 export interface AssParseResultSuccess {
@@ -204,36 +237,69 @@ type AssSource =
 	| { type: "string"; content: string }
 
 export class AssParser {
-	static resolve_parse_settings(settings_ts: ParseSettingsTS): ParseSettings {
+	static resolve_strict_settings(
+		settings_ts: StrictSettingsTS
+	): StrictSettings {
 		if (settings_ts === "strict") {
 			return {
-				strict_settings: {
-					script_info: {
-						allow_duplicate_fields: false,
-						allow_missing_script_type: false,
-					},
-					allow_additional_fields: false,
-					allow_number_truncating: false,
-					allow_unrecognized_file_encoding: false,
+				script_info: {
+					allow_duplicate_fields: false,
+					allow_missing_script_type: false,
 				},
+				allow_additional_fields: false,
+				allow_number_truncating: false,
+				allow_unrecognized_file_encoding: false,
+				allow_validation_errors: false,
 			}
 		}
 
 		if (settings_ts === "non-strict") {
 			return {
-				strict_settings: {
-					script_info: {
-						allow_duplicate_fields: true,
-						allow_missing_script_type: true,
-					},
-					allow_additional_fields: true,
-					allow_number_truncating: true,
-					allow_unrecognized_file_encoding: true,
+				script_info: {
+					allow_duplicate_fields: true,
+					allow_missing_script_type: true,
 				},
+				allow_additional_fields: true,
+				allow_number_truncating: true,
+				allow_unrecognized_file_encoding: true,
+				allow_validation_errors: true,
 			}
 		}
 
 		return settings_ts
+	}
+
+	static resolve_validate_settings(
+		settings_ts: ValidateSettingsTS
+	): ValidateSettings {
+		if (settings_ts === "everything") {
+			return {
+				font_settings: { preset: "strict-all" },
+				validate_text: true,
+				validate_styles: true,
+			}
+		}
+
+		if (settings_ts === "nothing") {
+			return {
+				font_settings: { preset: "disabled" },
+				validate_text: false,
+				validate_styles: false,
+			}
+		}
+
+		return settings_ts
+	}
+
+	static resolve_parse_settings(settings_ts: ParseSettingsTS): ParseSettings {
+		return {
+			strict_settings: AssParser.resolve_strict_settings(
+				settings_ts.strict_settings
+			),
+			validate_settings: AssParser.resolve_validate_settings(
+				settings_ts.validate_settings
+			),
+		}
 	}
 
 	private static parse_ass(
@@ -249,8 +315,9 @@ export class AssParser {
 		} catch (err) {
 			return {
 				error: true,
-				message: (err as Error).message,
-				warnings: [],
+				diagnostics: [
+					{ message: (err as Error).message, severity: "error" },
+				],
 			}
 		}
 	}

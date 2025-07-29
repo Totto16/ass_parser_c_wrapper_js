@@ -1,4 +1,4 @@
-#include "./wrapper.h"
+#include "./wrapper.hpp"
 
 AssParseResultCpp::AssParseResultCpp(AssParseResult* c_pointer) : m_c_value{ c_pointer } {}
 
@@ -6,22 +6,22 @@ AssParseResultCpp::~AssParseResultCpp() {
 	free_parse_result(m_c_value);
 }
 
-[[nodiscard]] Warnings AssParseResultCpp::warnings() {
+[[nodiscard]] Diagnostics AssParseResultCpp::diagnostics() {
 	if(m_c_value == nullptr) {
-		return Warnings{ .entries = STBDS_ARRAY_EMPTY };
+		return Diagnostics{ .entries = STBDS_ARRAY_EMPTY };
 	}
 
-	return get_warnings_from_result(m_c_value);
+	return get_diagnostics_from_result(m_c_value);
 }
 
 [[nodiscard]] std::variant<AssParseResultErrorCpp, AssParseResultOkCpp>
 AssParseResultCpp::result() {
 	if(m_c_value == nullptr) {
-		return AssParseResultErrorCpp{ .message = "allocation error" };
+		return AssParseResultErrorCpp{};
 	}
 
 	if(parse_result_is_error(m_c_value)) {
-		return AssParseResultErrorCpp{ .message = parse_result_get_error(m_c_value) };
+		return AssParseResultErrorCpp{};
 	}
 
 	return AssParseResultOkCpp{ .result = parse_result_get_value(m_c_value) };

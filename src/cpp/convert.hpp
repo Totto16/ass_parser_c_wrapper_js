@@ -20,7 +20,7 @@
 
 #include <ass_parser_lib.h>
 
-#include "./wrapper.h"
+#include "./wrapper.hpp"
 
 [[nodiscard]] std::expected<AssSourceCpp, v8::Local<v8::Value>>
 get_ass_source_from_info(v8::Local<v8::Value> value);
@@ -28,5 +28,6 @@ get_ass_source_from_info(v8::Local<v8::Value> value);
 [[nodiscard]] std::expected<ParseSettings, v8::Local<v8::Value>>
 get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value);
 
-[[nodiscard]] v8::Local<v8::Value>
-ass_parse_result_to_js(v8::Isolate* isolate, std::unique_ptr<AssParseResultCpp> result);
+[[nodiscard]] v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate,
+                                                          std::unique_ptr<AssParseResultCpp> result,
+                                                          AssSourceCpp source);

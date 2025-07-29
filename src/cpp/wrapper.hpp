@@ -17,9 +17,7 @@ struct StringSourceCpp {
 
 using AssSourceCpp = std::variant<FileSourceCpp, StringSourceCpp>;
 
-struct AssParseResultErrorCpp {
-	std::string message;
-};
+using AssParseResultErrorCpp = std::monostate;
 
 struct AssParseResultOkCpp {
 	AssResult result;
@@ -47,7 +45,7 @@ struct AssParseResultCpp {
 
 	~AssParseResultCpp();
 
-	[[nodiscard]] Warnings warnings();
+	[[nodiscard]] Diagnostics diagnostics();
 	[[nodiscard]] std::variant<AssParseResultErrorCpp, AssParseResultOkCpp> result();
 };
 

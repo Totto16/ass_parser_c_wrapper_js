@@ -91,7 +91,7 @@ get_ass_source_from_info(v8::Local<v8::Value> value) {
 }
 
 [[nodiscard]] static std::expected<ScriptInfoStrictSettings, v8::Local<v8::Value>>
-get_sscript_info_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
+get_script_info_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
 
 	auto allow_duplicate_fields_key = c_str_to_js("allow_duplicate_fields");
 
@@ -157,7 +157,7 @@ get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) 
 	auto script_info_value =
 	    script_info_value_raw->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-	auto script_info = get_sscript_info_strict_settings_from_js(isolate, script_info_value);
+	auto script_info = get_script_info_strict_settings_from_js(isolate, script_info_value);
 
 	if(not script_info.has_value()) {
 		return std::unexpected{ script_info.error() };
@@ -216,13 +216,133 @@ get_strict_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) 
 	auto allow_unrecognized_file_encoding =
 	    allow_unrecognized_file_encoding_value_raw->ToBoolean(isolate)->Value();
 
+	auto allow_validation_errors_key = c_str_to_js("allow_validation_errors");
+
+	if(!object->Has(Nan::GetCurrentContext(), allow_validation_errors_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError("the 'strict_settings' argument needs to have a "
+			                                   "'allow_validation_errors' key") };
+	}
+
+	auto allow_validation_errors_value_raw =
+	    object->Get(Nan::GetCurrentContext(), allow_validation_errors_key).ToLocalChecked();
+
+	if(!allow_validation_errors_value_raw->IsBoolean()) {
+		return std::unexpected{ Nan::TypeError(
+			"strict_settings.allow_validation_errors needs to be a boolean") };
+	}
+
+	auto allow_validation_errors = allow_validation_errors_value_raw->ToBoolean(isolate)->Value();
+
 	StrictSettings strict_settings = { .script_info = script_info.value(),
 		                               .allow_additional_fields = allow_additional_fields,
 		                               .allow_number_truncating = allow_number_truncating,
 		                               .allow_unrecognized_file_encoding =
-		                                   allow_unrecognized_file_encoding };
+		                                   allow_unrecognized_file_encoding,
+		                               .allow_validation_errors = allow_validation_errors };
 
 	return { strict_settings };
+}
+
+[[nodiscard]] static std::expected<FontSettings, v8::Local<v8::Value>>
+get_font_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
+
+	UNUSED(isolate);
+
+	auto preset_key = c_str_to_js("preset");
+
+	if(!object->Has(Nan::GetCurrentContext(), preset_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError(
+			"the 'font_settings' argument needs to have a 'preset' key") };
+	}
+
+	auto preset_value_raw = object->Get(Nan::GetCurrentContext(), preset_key).ToLocalChecked();
+
+	if(!preset_value_raw->IsString()) {
+		return std::unexpected{ Nan::TypeError("script_info.preset needs to be a string") };
+	}
+
+	auto preset_string_local =
+	    preset_value_raw->ToString(Nan::GetCurrentContext()).ToLocalChecked();
+
+	const char* preset_string = *Nan::Utf8String(preset_string_local);
+
+	int parsed_preset = parse_font_preset(preset_string);
+
+	if(parsed_preset < 0) {
+		return std::unexpected{ Nan::TypeError("script_info.preset needs to be a valid string") };
+	}
+
+	FontSettings font_settings = { .preset = static_cast<FontPreset>(parsed_preset) };
+
+	return { font_settings };
+}
+
+[[nodiscard]] static std::expected<ValidateSettings, v8::Local<v8::Value>>
+get_validate_settings_from_js(v8::Isolate* isolate, v8::Local<v8::Object> object) {
+
+	auto font_settings_key = c_str_to_js("font_settings");
+
+	if(!object->Has(Nan::GetCurrentContext(), font_settings_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError(
+			"the 'validate_settings' argument needs to have a 'font_settings' key") };
+	}
+
+	auto font_settings_value_raw =
+	    object->Get(Nan::GetCurrentContext(), font_settings_key).ToLocalChecked();
+
+	if(!font_settings_value_raw->IsObject()) {
+		return std::unexpected{ Nan::TypeError(
+			"validate_settings.font_settings needs to be an object") };
+	}
+
+	auto font_settings_value =
+	    font_settings_value_raw->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+
+	auto font_settings = get_font_settings_from_js(isolate, font_settings_value);
+
+	if(not font_settings.has_value()) {
+		return std::unexpected{ font_settings.error() };
+	}
+
+	auto validate_styles_key = c_str_to_js("validate_styles");
+
+	if(!object->Has(Nan::GetCurrentContext(), validate_styles_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError(
+			"the 'validate_settings' argument needs to have a 'validate_styles' key") };
+	}
+
+	auto validate_styles_value_raw =
+	    object->Get(Nan::GetCurrentContext(), validate_styles_key).ToLocalChecked();
+
+	if(!validate_styles_value_raw->IsBoolean()) {
+		return std::unexpected{ Nan::TypeError(
+			"strict_settings.validate_styles needs to be a boolean") };
+	}
+
+	auto validate_styles = validate_styles_value_raw->ToBoolean(isolate)->Value();
+
+	auto validate_text_key = c_str_to_js("validate_text");
+
+	if(!object->Has(Nan::GetCurrentContext(), validate_text_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError(
+			"the 'validate_settings' argument needs to have a 'validate_text' key") };
+	}
+
+	auto validate_text_value_raw =
+	    object->Get(Nan::GetCurrentContext(), validate_text_key).ToLocalChecked();
+
+	if(!validate_text_value_raw->IsBoolean()) {
+		return std::unexpected{ Nan::TypeError(
+			"strict_settings.validate_text needs to be a boolean") };
+	}
+
+	auto validate_text = validate_text_value_raw->ToBoolean(isolate)->Value();
+
+	ValidateSettings validate_settings = { .font_settings = font_settings.value(),
+		                                   .validate_styles = validate_styles,
+		                                   .validate_text = validate_text };
+
+	return { validate_settings };
 }
 
 [[nodiscard]] std::expected<ParseSettings, v8::Local<v8::Value>>
@@ -257,7 +377,32 @@ get_parse_settings_from_info(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 		return std::unexpected{ strict_settings.error() };
 	}
 
-	ParseSettings settings = { .strict_settings = strict_settings.value() };
+	auto validate_settings_key = c_str_to_js("validate_settings");
+
+	if(!object->Has(Nan::GetCurrentContext(), validate_settings_key).ToChecked()) {
+		return std::unexpected{ Nan::TypeError(
+			"the 'settings' argument needs to have a 'validate_settings' key") };
+	}
+
+	auto validate_settings_value_raw =
+	    object->Get(Nan::GetCurrentContext(), validate_settings_key).ToLocalChecked();
+
+	if(!validate_settings_value_raw->IsObject()) {
+		return std::unexpected{ Nan::TypeError(
+			"settings.validate_settings needs to be an object") };
+	}
+
+	auto validate_settings_value =
+	    validate_settings_value_raw->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+
+	auto validate_settings = get_validate_settings_from_js(isolate, validate_settings_value);
+
+	if(not validate_settings.has_value()) {
+		return std::unexpected{ validate_settings.error() };
+	}
+
+	ParseSettings settings = { .strict_settings = strict_settings.value(),
+		                       .validate_settings = validate_settings.value() };
 
 	return { settings };
 }
@@ -342,34 +487,90 @@ using ObjectProperties = std::vector<std::pair<std::string, v8::Local<v8::Value>
 
 // complex structs / objects to js
 
-[[nodiscard]] static v8::Local<v8::Value> warning_to_js(v8::Isolate* isolate,
-                                                        const WarningEntry& warning) {
+[[nodiscard]] static v8::Local<v8::Value> file_pos_to_js(v8::Isolate* isolate,
+                                                         const FilePos& file_pos) {
+
+	auto js_line = size_t_to_js(isolate, file_pos.line);
+
+	auto js_column = size_t_to_js(isolate, file_pos.column);
+
+	ObjectProperties properties{
+		{ "line", js_line },
+		{ "column", js_column },
+
+	};
+
+	return make_js_object(isolate, properties);
+}
+
+[[nodiscard]] static const char* diagnostic_severity_string(DiagnosticSeverity severity) {
+	switch(severity) {
+		case DiagnosticSeverityError: return "error";
+		case DiagnosticSeverityWarning: return "warning";
+		default: {
+			assert(false && "UNREACHABLE");
+			return "<ERROR>";
+		}
+	}
+}
+
+[[nodiscard]] static v8::Local<v8::Value>
+diagnostic_severity_to_js(v8::Isolate* isolate, const DiagnosticSeverity& severity) {
+	UNUSED(isolate);
+	return c_str_to_js(diagnostic_severity_string(severity));
+}
+
+[[nodiscard]] static v8::Local<v8::Value>
+diagnostic_to_js(v8::Isolate* isolate, const DiagnosticEntry& diagnostic, const char* source_file) {
 
 	UNUSED(isolate);
 
 	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
-	ErrorStruct message = get_warnings_message_from_entry(warning);
+	MessageStruct message = get_message_from_entry(diagnostic, source_file);
 
 	auto js_message = c_str_to_js(message.message);
 
-	free_error_struct(message);
+	free_message_struct(message);
 
-	v8::Local<v8::String> message_key = c_str_to_js("message");
-	Nan::Set(result, message_key, js_message).Check();
+	auto js_severity = diagnostic_severity_to_js(isolate, diagnostic.severity);
+
+	ObjectProperties properties{
+		{ "message", js_message },
+		{ "severity", js_severity },
+	};
+
+	if(!is_empty_pos(diagnostic.position)) {
+
+		auto js_position = file_pos_to_js(isolate, diagnostic.position);
+
+		properties.emplace_back("position", js_position);
+	}
+
+	return make_js_object(isolate, properties);
 
 	return result;
 }
 
-[[nodiscard]] static v8::Local<v8::Value> warnings_to_js(v8::Isolate* isolate,
-                                                         const Warnings& warnings) {
+[[nodiscard]] static v8::Local<v8::Value>
+diagnostics_to_js(v8::Isolate* isolate, const Diagnostics& diagnostics, AssSourceCpp ass_source) {
+
+	const char* source_file = NULL;
+
+	std::visit(helper::Overloaded{
+	               [&source_file](const FileSourceCpp& file_source) -> void {
+		               source_file = file_source.file.c_str();
+	               },
+	               [&source_file](const StringSourceCpp&) -> void { source_file = NULL; },
+	           },
+	           ass_source);
 
 	v8::Local<v8::Array> array = v8::Array::New(isolate);
 
-	for(size_t i = 0; i < stbds_arrlenu(warnings.entries); ++i) {
-		WarningEntry warning = warnings.entries[i];
+	for(size_t i = 0; i < stbds_arrlenu(diagnostics.entries); ++i) {
+		DiagnosticEntry diagnostic = diagnostics.entries[i];
 
-		Nan::Set(array, i, warning_to_js(isolate, warning));
+		Nan::Set(array, i, diagnostic_to_js(isolate, diagnostic, source_file));
 	}
 
 	return array;
@@ -808,19 +1009,16 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 }
 
 v8::Local<v8::Value> ass_parse_result_to_js(v8::Isolate* isolate,
-                                            std::unique_ptr<AssParseResultCpp> result) {
+                                            std::unique_ptr<AssParseResultCpp> result,
+                                            AssSourceCpp ass_source) {
 
-	auto js_warnings = warnings_to_js(isolate, result->warnings());
+	auto js_diagnostics = diagnostics_to_js(isolate, result->diagnostics(), ass_source);
 
-	ObjectProperties properties{ { "warnings", js_warnings } };
+	ObjectProperties properties{ { "diagnostics", js_diagnostics } };
 
 	std::visit(helper::Overloaded{
-	               [&properties](const AssParseResultErrorCpp& result_err) -> void {
+	               [&properties](const AssParseResultErrorCpp&) -> void {
 		               properties.emplace_back("error", Nan::True());
-
-		               auto message_js = str_to_js(result_err.message);
-
-		               properties.emplace_back("message", message_js);
 	               },
 	               [&properties, isolate](const AssParseResultOkCpp& result_ok) -> void {
 		               properties.emplace_back("error", Nan::False());
