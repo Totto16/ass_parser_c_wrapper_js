@@ -557,7 +557,7 @@ diagnostic_severity_to_js(v8::Isolate* isolate, const DiagnosticSeverity& severi
 
 	v8::Local<v8::Array> array = v8::Array::New(isolate);
 
-	for(size_t i = 0; i < stbds_arrlenu(diagnostics.entries); ++i) {
+	for(size_t i = 0; i < ZVEC_LENGTH(diagnostics.entries); ++i) {
 		DiagnosticEntry diagnostic = diagnostics.entries[i];
 
 		Nan::Set(array, i, diagnostic_to_js(isolate, diagnostic));
@@ -754,7 +754,7 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 
 	v8::Local<v8::Array> array = v8::Array::New(isolate);
 
-	for(size_t i = 0; i < stbds_arrlenu(events.entries); ++i) {
+	for(size_t i = 0; i < ZVEC_LENGTH(events.entries); ++i) {
 		AssEventEntry event = events.entries[i];
 
 		Nan::Set(array, i, event_to_js(isolate, event));
@@ -878,7 +878,7 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 
 	v8::Local<v8::Array> array = v8::Array::New(isolate);
 
-	for(size_t i = 0; i < stbds_arrlenu(styles.entries); ++i) {
+	for(size_t i = 0; i < ZVEC_LENGTH(styles.entries); ++i) {
 		AssStyleEntry style = styles.entries[i];
 
 		Nan::Set(array, i, style_to_js(isolate, style));
