@@ -164,12 +164,7 @@ export interface AssStyle {
 
 export type ScriptType = "Unknown" | "V4" | "V4Plus"
 
-export enum WrapStyle {
-	"Smart" = 0,
-	"EOL",
-	"NoWrap",
-	"SmartLow",
-}
+export type WrapStyle = "Smart" | "EOL" | "NoWrap" | "SmartLow"
 
 export interface AssScriptInfo {
 	title: string
