@@ -626,7 +626,7 @@ extra_section_entry_to_js(v8::Isolate* isolate, const ExtraSectionEntry& entry) 
 
 	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
-	size_t hm_length = stbds_shlenu(entry.fields);
+	size_t hm_length = ZMAP_FOREACH_TODO(entry.fields);
 
 	for(size_t i = 0; i < hm_length; ++i) {
 		SectionFieldEntry hm_entry = entry.fields[i];
@@ -646,7 +646,7 @@ extra_sections_to_js(v8::Isolate* isolate, const ExtraSections& extra_sections) 
 
 	v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
-	size_t hm_length = stbds_shlenu(extra_sections.entries);
+	size_t hm_length = ZMAP_FOREACH_TODO(extra_sections.entries);
 
 	for(size_t i = 0; i < hm_length; ++i) {
 		ExtraSectionHashMapEntry entry = extra_sections.entries[i];
